@@ -7,7 +7,7 @@
 @File    :   evaluate.py.py
 @Time    :   8/30/19 8:59 PM
 @Desc    :   Evaluation Scripts
-@License :   This source code is licensed under the license found in the 
+@License :   This source code is licensed under the license found in the
              LICENSE file in the root directory of this source tree.
 """
 
@@ -93,9 +93,9 @@ def main():
     input_size = dataset_settings[args.dataset]['input_size']
     label = dataset_settings[args.dataset]['label']
 
-    model = network(num_classes=num_classes, pretrained=None).cuda()
+    model = network(num_classes=num_classes, pretrained=None) #.cuda()
     model = nn.DataParallel(model)
-    state_dict = torch.load(args.restore_weight)
+    state_dict = torch.load(args.restore_weight, map_location='cpu')
     model.load_state_dict(state_dict)
     model.eval()
 
@@ -121,7 +121,7 @@ def main():
             w = meta['width'].numpy()[0]
             h = meta['height'].numpy()[0]
 
-            output = model(image.cuda())
+            output = model(image) #.cuda())
             upsample = torch.nn.Upsample(size=input_size, mode='bilinear', align_corners=True)
             upsample_output = upsample(output)
             upsample_output = upsample_output.squeeze()
@@ -132,7 +132,7 @@ def main():
 
             parsing_result_path = os.path.join(args.output, img_name[:-4]+'.png')
             output_img = Image.fromarray(np.asarray(parsing_result, dtype=np.uint8))
-            output_img.putpalette(palette)
+            # output_img.putpalette(palette)
             output_img.save(parsing_result_path)
             if args.logits:
                 logits_result_path = os.path.join(args.output, img_name[:-4] + '.npy')
